@@ -1,0 +1,3 @@
+# Image-segmentation using PASCAL VOC 2012 Dataset
+Dataset composed of everyday pictures with 21 classes, including background, cars, bikes, persons, ...
+To perform the image segmentation, I implemented from scratch a model called UNet
