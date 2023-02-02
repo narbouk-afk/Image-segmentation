@@ -1,8 +1,5 @@
 import tensorflow as tf
-import numpy as np
-
 import tensorflow.keras.layers as tkl
-import pandas
 
 def down_conv_block(inputs=None, n_filters=32, dropout_prob=0, max_pooling=True):
     """
@@ -30,7 +27,6 @@ def down_conv_block(inputs=None, n_filters=32, dropout_prob=0, max_pooling=True)
         next_layer = conv
         
     skip_connection = conv
-    
     return next_layer, skip_connection
 
 def up_conv_block(input, skip, n_filters=32):
@@ -58,7 +54,7 @@ def up_conv_block(input, skip, n_filters=32):
     up = tkl.Conv2DTranspose(n_filters,3,strides=(2,2),padding="same")(input)
     
     # Merge the previous output and the skip
-    merge = tkl.concatenate([up, skip], axis=3)
+    merge = tkl.concatenate([up, skip], axis=-1)
     
     conv = tkl.Conv2D(n_filters,3,activation='relu',padding="same",kernel_initializer="HeNormal")(merge)
     conv = tkl.Conv2D(n_filters,3,activation='relu',padding="same",kernel_initializer="HeNormal")(conv)
@@ -78,14 +74,13 @@ def unet(input_size=(96, 128, 3), n_filters=32, n_classes=23):
         model -- tf.keras.Model
     """
     inputs = tkl.Input(input_size)
-    
+
     # Contracting Path (encoding)
     cblock1 = down_conv_block(inputs, n_filters)
 
     cblock2 = down_conv_block(cblock1[0], 2*n_filters)
     cblock3 = down_conv_block(cblock2[0], 4*n_filters)
-    cblock4 = down_conv_block(cblock3[0], 8*n_filters, dropout_prob=0.3) 
-
+    cblock4 = down_conv_block(cblock3[0], 8*n_filters, dropout_prob=0.3)
     cblock5 = down_conv_block(cblock4[0], 16*n_filters, dropout_prob=0.3, max_pooling=False) 
 
     
@@ -101,8 +96,6 @@ def unet(input_size=(96, 128, 3), n_filters=32, n_classes=23):
 
 
     conv10 = tkl.Conv2D(n_classes, 1, padding="same")(conv9)
-    
     model = tf.keras.Model(inputs=inputs, outputs=conv10)
 
     return model
-
